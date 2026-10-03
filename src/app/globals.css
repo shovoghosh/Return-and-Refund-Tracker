@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f7f8;
+  --surface: #ffffff;
+  --foreground: #16181d;
+  --muted: #5c6169;
+  --border: #e2e4e9;
+  --accent: #1f5f5b;
+  --accent-fg: #ffffff;
+  --danger: #a4322b;
+  --warn-bg: #fdf6e3;
+  --warn-border: #e0c98a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #101114;
+    --surface: #191b20;
+    --foreground: #eceef2;
+    --muted: #a2a8b3;
+    --border: #2c303a;
+    --accent: #4fb3ac;
+    --accent-fg: #0b1113;
+    --danger: #f0837c;
+    --warn-bg: #2b2716;
+    --warn-border: #5c5230;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Visible focus for keyboard users everywhere. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Minimum comfortable tap target for the primary controls on a phone. */
+@media (max-width: 480px) {
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px; /* prevents iOS zoom-on-focus */
+  }
+}

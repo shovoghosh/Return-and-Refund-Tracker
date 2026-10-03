@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  passwordHash     String
+  emailVerifiedAt  DateTime?
+  timezone         String    @default("America/Edmonton")
+  reminderOffsets  Json      @default("[7,2,1]")
+  reminderHour     Int       @default(9)
+  emailRemindersOn Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  orders           Order[]
+  items            Item[]
+  returns          Return[]
+  attachments      Attachment[]
+  events           Event[]
+  reminderDeliveries ReminderDelivery[]
+  sessions         Session[]
+  verifyTokens     VerifyToken[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerifyToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  purpose   String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id           String   @id @default(cuid())
+  userId       String
+  storeName    String
+  orderNumber  String?
+  purchaseDate DateTime @db.Date
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items        Item[]
+
+  @@index([userId])
+}
+
+enum ItemStatus {
+  OPEN
+  RETURN_STARTED
+  RETURNED
+  REFUND_PENDING
+  REFUND_RECEIVED
+  KEPT
+}
+
+model Item {
+  id             String     @id @default(cuid())
+  userId         String
+  orderId        String
+  name           String
+  amountCents    Int?
+  currency       String?    @db.Char(3)
+  itemUrl        String?
+  returnDeadline DateTime   @db.Date
+  status         ItemStatus @default(OPEN)
+  notes          String?
+  archivedAt     DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order          Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  return         Return?
+  attachments    Attachment[]
+  events         Event[]
+  reminderDeliveries ReminderDelivery[]
+
+  @@index([userId, status])
+  @@index([userId, returnDeadline])
+}
+
+model Return {
+  id                  String    @id @default(cuid())
+  itemId              String    @unique
+  userId              String
+  returnStartedAt     DateTime?
+  returnedAt          DateTime?
+  carrier             String?
+  trackingNumber      String?
+  expectedRefundCents Int?
+  expectedRefundDate  DateTime? @db.Date
+  actualRefundCents   Int?
+  actualRefundDate    DateTime? @db.Date
+  refundReceivedAt    DateTime?
+  notes               String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  item                Item      @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id               String   @id @default(cuid())
+  userId           String
+  itemId           String
+  storageKey       String   @unique
+  originalFilename String
+  contentType      String
+  sizeBytes        Int
+  kind             String
+  createdAt        DateTime @default(now())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item             Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  userId    String
+  itemId    String
+  eventType String
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId, createdAt])
+}
+
+enum ReminderType {
+  DEADLINE_7
+  DEADLINE_2
+  DEADLINE_1
+  DEADLINE_TODAY
+  REFUND_CHECK_IN
+  REFUND_FOLLOW_UP
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+model ReminderDelivery {
+  id                String         @id @default(cuid())
+  userId            String
+  itemId            String
+  reminderType      ReminderType
+  scheduledFor      DateTime
+  sentAt            DateTime?
+  providerMessageId String?
+  status            DeliveryStatus @default(PENDING)
+  attemptCount      Int            @default(0)
+  lastError         String?
+  createdAt         DateTime       @default(now())
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item              Item           @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, reminderType, scheduledFor])
+  @@index([status, scheduledFor])
+}
