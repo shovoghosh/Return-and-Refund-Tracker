@@ -32,8 +32,12 @@ export interface ReturnDetailsArgs {
  * suggested check-in is returned so the UI can label it as a user-editable
  * reminder rather than a retailer promise.
  */
-export async function upsertReturnDetails(args: ReturnDetailsArgs, now: Date = new Date()) {
-  return prisma.$transaction(async (tx) => {
+export async function upsertReturnDetails(args: ReturnDetailsArgs) {
+  // Cloudflare D1 does not support interactive transactions, so these steps
+  // run sequentially. Each one is still scoped to userId; a mid-way failure
+  // leaves a partial write rather than rolling back.
+  return (async () => {
+    const tx = prisma;
     const item = await tx.item.findFirst({
       where: { id: args.itemId, userId: args.userId },
       select: { id: true, status: true, archivedAt: true, return: { select: { id: true } } },
@@ -71,5 +75,5 @@ export async function upsertReturnDetails(args: ReturnDetailsArgs, now: Date = n
     });
 
     return rec;
-  });
+  })();
 }

@@ -1,6 +1,14 @@
 import { DateTime } from "luxon";
-import type { ReminderType } from "@/generated/prisma/enums";
 import { shouldSendDeadlineReminders, type ItemStatus } from "./status";
+
+/** Reminder kinds. Stored as a string because SQLite has no enum type. */
+export type ReminderType =
+  | "DEADLINE_7"
+  | "DEADLINE_2"
+  | "DEADLINE_1"
+  | "DEADLINE_TODAY"
+  | "REFUND_CHECK_IN"
+  | "REFUND_FOLLOW_UP";
 
 /**
  * Offset (days before the deadline) -> reminder type. Only these four offsets
@@ -27,15 +35,33 @@ export function typeForOffset(offset: number): ReminderType {
   return hit.type;
 }
 
+/**
+ * Reminder offsets are stored as a JSON string ("[7,2]") because SQLite has no
+ * array or JSON column type. Accepts either the stored string or an array so
+ * callers cannot accidentally fall back to the defaults.
+ */
 export function normalizeOffsets(raw: unknown): number[] {
-  if (!Array.isArray(raw)) return [...DEFAULT_REMINDER_OFFSETS];
+  let value = raw;
+  if (typeof raw === "string") {
+    try {
+      value = JSON.parse(raw);
+    } catch {
+      value = null;
+    }
+  }
+  if (!Array.isArray(value)) return [...DEFAULT_REMINDER_OFFSETS];
   const allowed = new Set(REMINDER_OFFSET_TYPES.map((o) => o.offset));
   const seen = new Set<number>();
-  for (const v of raw) {
+  for (const v of value) {
     const n = typeof v === "number" ? v : Number(v);
     if (Number.isInteger(n) && allowed.has(n)) seen.add(n);
   }
   return [...seen].sort((a, b) => b - a);
+}
+
+/** Inverse of normalizeOffsets for persistence. */
+export function encodeOffsets(offsets: readonly number[]): string {
+  return JSON.stringify([...offsets]);
 }
 
 export interface PlannedReminder {

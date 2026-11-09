@@ -1,14 +1,15 @@
 import { z } from "zod";
 
 const schema = z.object({
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  // Only the Prisma CLI needs a connection string; the app reads D1 through a
+  // binding, so this is optional at runtime.
+  DATABASE_URL: z.string().optional().default(""),
   APP_URL: z.string().default("http://localhost:3000"),
   SESSION_SECRET: z.string().min(16, "SESSION_SECRET must be at least 16 characters"),
-  SMTP_HOST: z.string().optional().default(""),
-  SMTP_PORT: z.coerce.number().int().positive().default(587),
-  SMTP_USER: z.string().optional().default(""),
-  SMTP_PASS: z.string().optional().default(""),
+  // Resend HTTP API key. Empty means "log the email to stdout" (local dev).
+  RESEND_API_KEY: z.string().optional().default(""),
   EMAIL_FROM: z.string().default("Return Tracker <reminders@example.com>"),
+  SUPPORT_EMAIL: z.string().default("support@example.com"),
   UPLOAD_DIR: z.string().default("./uploads"),
   MAX_UPLOAD_MB: z.coerce.number().int().positive().default(10),
   MAX_FILES_PER_ITEM: z.coerce.number().int().positive().default(5),

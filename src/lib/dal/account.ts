@@ -22,6 +22,7 @@ export interface ExportRow {
   refund_received_at: string;
   attachment_count: string;
   created_at: string;
+  item_id: string;
 }
 
 function iso(d: Date | null | undefined): string {
@@ -52,6 +53,7 @@ export async function exportUserData(userId: string): Promise<{
     where: { userId },
     orderBy: { createdAt: "asc" },
     select: {
+      id: true,
       name: true,
       status: true,
       amountCents: true,
@@ -82,6 +84,7 @@ export async function exportUserData(userId: string): Promise<{
     exportedAt: new Date().toISOString(),
     user,
     items: items.map((i) => ({
+      item_id: i.id,
       item_name: i.name,
       store_name: i.order.storeName,
       order_number: i.order.orderNumber ?? "",
@@ -107,9 +110,36 @@ export async function exportUserData(userId: string): Promise<{
   };
 }
 
+/** Column order for CSV exports — matches the ExportRow interface declaration so the
+ * produced files never change order across versions. */
+const CSV_KEY_ORDER: Array<keyof ExportRow> = [
+  "item_name",
+  "store_name",
+  "order_number",
+  "purchase_date",
+  "return_deadline",
+  "status",
+  "amount",
+  "currency",
+  "item_url",
+  "notes",
+  "return_started_at",
+  "returned_at",
+  "carrier",
+  "tracking_number",
+  "expected_refund_amount",
+  "expected_refund_date",
+  "actual_refund_amount",
+  "actual_refund_date",
+  "refund_received_at",
+  "attachment_count",
+  "created_at",
+  "item_id",
+];
+
 export function toCsv(rows: ExportRow[]): string {
   if (rows.length === 0) return "";
-  const headers = Object.keys(rows[0]) as Array<keyof ExportRow>;
+  const headers = CSV_KEY_ORDER;
   const escape = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
   const lines = [headers.join(",")];
   for (const row of rows) lines.push(headers.map((h) => escape(row[h] ?? "")).join(","));
@@ -118,7 +148,11 @@ export function toCsv(rows: ExportRow[]): string {
 
 /** Deletes the account and every owned row. Returns storage keys to purge. */
 export async function deleteAccount(userId: string): Promise<string[]> {
-  return prisma.$transaction(async (tx) => {
+  // Cloudflare D1 does not support interactive transactions, so these steps
+  // run sequentially. Each one is still scoped to userId; a mid-way failure
+  // leaves a partial write rather than rolling back.
+  return (async () => {
+    const tx = prisma;
     const attachments = await tx.attachment.findMany({
       where: { userId },
       select: { storageKey: true },
@@ -127,5 +161,5 @@ export async function deleteAccount(userId: string): Promise<string[]> {
     // sessions and verification tokens.
     await tx.user.delete({ where: { id: userId } });
     return attachments.map((a) => a.storageKey);
-  });
+  })();
 }

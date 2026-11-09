@@ -1,0 +1,17 @@
+# Local values for `wrangler dev` / `opennextjs-cloudflare preview`.
+# Copy to `.dev.vars` (git-ignored). `next dev` reads `.env` instead.
+SESSION_SECRET="REPLACE_WITH_A_RANDOM_STRING_OF_AT_LEAST_32_CHARS"
+
+# Empty = print emails to the terminal instead of sending.
+RESEND_API_KEY=""
+EMAIL_FROM="Return Tracker <reminders@example.com>"
+SUPPORT_EMAIL="support@example.com"
+
+# Required by the scheduled handler and the cron endpoint when set.
+CRON_SECRET=""
+# Origin used for links in emails and for the cron self-call.
+APP_URL="http://localhost:8787"
+
+UPLOAD_DIR="./uploads"
+MAX_UPLOAD_MB="10"
+MAX_FILES_PER_ITEM="5"

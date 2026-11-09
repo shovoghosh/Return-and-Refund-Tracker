@@ -1,4 +1,4 @@
-import type { ItemStatus } from "@/generated/prisma/enums";
+import type { ItemStatus } from "./status";
 
 export type AuditEventType =
   | "ITEM_CREATED"
@@ -14,7 +14,10 @@ export type AuditEventType =
   | "ATTACHMENT_DELETED"
   | "REMINDER_SENT"
   | "REMINDER_FAILED"
-  | "REFUND_CONFIRMED";
+  | "REMINDER_FOLLOWUP_SCHEDULED"
+  | "REFUND_CONFIRMED"
+  | "DATA_EXPORTED"
+  | "ACCOUNT_DELETED";
 
 export const EVENT_LABELS: Record<AuditEventType, string> = {
   ITEM_CREATED: "Purchase added",
@@ -30,7 +33,10 @@ export const EVENT_LABELS: Record<AuditEventType, string> = {
   ATTACHMENT_DELETED: "File removed",
   REMINDER_SENT: "Reminder sent",
   REMINDER_FAILED: "Reminder failed",
+  REMINDER_FOLLOWUP_SCHEDULED: "Refund follow-up scheduled",
   REFUND_CONFIRMED: "Refund confirmed by you",
+  DATA_EXPORTED: "Data exported",
+  ACCOUNT_DELETED: "Account and all data deleted",
 };
 
 export interface StatusChangedMeta {

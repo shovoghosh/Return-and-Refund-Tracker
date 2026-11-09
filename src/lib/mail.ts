@@ -1,4 +1,3 @@
-import nodemailer, { type Transporter } from "nodemailer";
 import { getEnv } from "./env";
 
 export interface MailMessage {
@@ -11,36 +10,24 @@ export interface MailMessage {
 export interface MailResult {
   delivered: boolean;
   providerMessageId: string | null;
-  /** True when the dev transport was used instead of a real SMTP send. */
+  /** True when the message was only logged instead of sent (local dev). */
   devLogged: boolean;
 }
 
-let transporter: Transporter | null = null;
-
-function getTransporter(): Transporter | null {
-  const env = getEnv();
-  if (!env.SMTP_HOST) return null;
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: env.SMTP_HOST,
-      port: env.SMTP_PORT,
-      secure: env.SMTP_PORT === 465,
-      auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
-    });
-  }
-  return transporter;
-}
+const RESEND_ENDPOINT = "https://api.resend.com/emails";
 
 /**
- * Sends one email. With no SMTP_HOST configured (the local/dev case) the message
- * is written to stdout and reported as devLogged rather than silently dropped, so
- * reminder behaviour is still observable without a mail provider.
+ * Sends one transactional email through Resend's HTTP API.
+ *
+ * Workers cannot open raw SMTP connections, so nodemailer is not an option in
+ * production. With no RESEND_API_KEY configured (the local/dev case) the message
+ * is written to stdout and reported as devLogged rather than silently dropped,
+ * so reminder behaviour is still observable without a provider.
  */
 export async function sendMail(message: MailMessage): Promise<MailResult> {
   const env = getEnv();
-  const tx = getTransporter();
 
-  if (!tx) {
+  if (!env.RESEND_API_KEY) {
     console.log(
       [
         "── [dev mail] ──────────────────────────────",
@@ -55,28 +42,36 @@ export async function sendMail(message: MailMessage): Promise<MailResult> {
     return { delivered: true, providerMessageId: null, devLogged: true };
   }
 
-  const info = await tx.sendMail({
-    from: env.EMAIL_FROM,
-    to: message.to,
-    subject: message.subject,
-    text: message.text,
-    html: message.html,
+  const response = await fetch(RESEND_ENDPOINT, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${env.RESEND_API_KEY}`,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      from: env.EMAIL_FROM,
+      to: [message.to],
+      subject: message.subject,
+      text: message.text,
+      ...(message.html ? { html: message.html } : {}),
+    }),
   });
 
+  if (!response.ok) {
+    // Keep the body short: it can echo the recipient address back.
+    const detail = (await response.text()).slice(0, 300);
+    throw new Error(`Resend rejected the message (${response.status}): ${detail}`);
+  }
+
+  const data = (await response.json().catch(() => ({}))) as { id?: string };
   return {
     delivered: true,
-    providerMessageId: (info.messageId as string | undefined) ?? null,
+    providerMessageId: data.id ?? null,
     devLogged: false,
   };
 }
 
+/** True when a real provider is configured. Used by the settings/health copy. */
 export async function verifyMailTransport(): Promise<boolean> {
-  const tx = getTransporter();
-  if (!tx) return false;
-  try {
-    await tx.verify();
-    return true;
-  } catch {
-    return false;
-  }
+  return Boolean(getEnv().RESEND_API_KEY);
 }

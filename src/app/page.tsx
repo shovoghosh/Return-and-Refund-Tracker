@@ -1,69 +1,110 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import Link from "next/link";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "Return Tracker — never miss a return deadline again",
+  description:
+    "Track online purchases, get reminded before each store's return deadline, and confirm when your refund actually arrives.",
+};
+
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <section className="flex flex-col gap-2">
+    <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+    {children}
+  </section>
+);
+
+export default function LandingPage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="flex flex-col gap-10">
+      <header className="flex items-center justify-between gap-4">
+        <span className="text-lg font-semibold tracking-tight">Return Tracker</span>
+        <nav aria-label="Account">
+          <Link
+            href="/sign-in"
+            className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-muted underline-offset-2 hover:text-foreground hover:underline"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Sign in
+          </Link>
+        </nav>
+      </header>
+
+      <section className="flex flex-col gap-4">
+        <h1 className="max-w-2xl text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          Track your online purchases and get a friendly reminder before each return deadline passes.
+        </h1>
+        <p className="max-w-2xl text-base text-muted">
+          You add the item and the store&apos;s stated return-by date; we keep it in one place, remind
+          you 7 days, 2 days, and 1 day ahead (and on the day itself if you like), and stay out of the
+          way until you tell us the item was returned and the refund landed.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/sign-up"
+            className="inline-flex min-h-12 items-center justify-center rounded-lg bg-accent px-6 py-3 text-base font-medium text-accent-fg transition hover:opacity-90"
           >
-            Documentation
-          </a>
+            Create your free account
+          </Link>
+          <Link
+            href="/sign-in"
+            className="inline-flex min-h-12 items-center justify-center rounded-lg border border-border bg-surface px-6 py-3 text-base font-medium transition hover:border-accent"
+          >
+            Sign in
+          </Link>
         </div>
-      </main>
+      </section>
+
+      <Section title="What this app does">
+        <ul className="list-disc space-y-1 pl-5 text-sm text-muted">
+          <li>Stores the purchases you want to track, and the return deadline you entered for each one.</li>
+          <li>Shows your deadlines in the order they are coming up, in your own time zone.</li>
+          <li>Sends reminder emails at the times you choose, and keeps a record of what was sent.</li>
+          <li>Lets you follow a return from started to shipped to refund pending, and confirm for yourself when the money arrives.</li>
+          <li>Exports or deletes everything you have entered, whenever you ask.</li>
+        </ul>
+      </Section>
+
+      <Section title="What this app does not do">
+        <ul className="list-disc space-y-1 pl-5 text-sm text-muted">
+          <li>It never reads your email inbox or connects to your email account.</li>
+          <li>It never guesses a store&apos;s return policy. You enter the deadline; the app does not look it up or invent one.</li>
+          <li>It never connects to your bank, card, or payment accounts.</li>
+          <li>It never claims a refund arrived. Only you can confirm that, and the app says so until you do.</li>
+        </ul>
+      </Section>
+
+      <Section title="Your privacy">
+        <p className="max-w-2xl text-sm text-muted">
+          A purchase history can say a lot about a person, so we collect as little as possible. We
+          store the purchases you enter, your reminder preferences, and your time zone — nothing more.
+          We do not ask for bank details or inbox access, and nothing is shared with the stores you
+          track. Your data is only ever read back to you: exports and reminders are built from your
+          rows alone, and no other account can see them.
+        </p>
+        <p className="max-w-2xl text-sm text-muted">
+          You can change your reminders or delete your account and its uploaded files at any time from
+          Settings. If you want your data, one button produces a CSV or JSON file; if you want it gone,
+          deletion removes your records and files on your account&apos;s normal backup rotation.
+        </p>
+      </Section>
+
+      <Section title="Honest about outcomes">
+        <p className="max-w-2xl text-sm text-muted">
+          We do not claim the app has &ldquo;saved&rdquo; you money. A reminder is not proof that a
+          refund was recovered. The app helps you remember; whether a return succeeds and a refund
+          arrives is something only you can confirm.
+        </p>
+      </Section>
+
+      <footer className="flex flex-col gap-2 border-t border-border pt-4 text-sm text-muted">
+        <p>
+          Ready to start?{" "}
+          <Link href="/sign-up" className="font-medium text-foreground underline underline-offset-2">
+            Create a free account
+          </Link>{" "}
+          — it takes one item to see the value.
+        </p>
+      </footer>
     </div>
   );
 }

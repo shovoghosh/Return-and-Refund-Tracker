@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated build output: the OpenNext worker bundle, wrangler's local
+    // state and dry-run output, and Prisma's generated client.
+    ".open-next/**",
+    ".wrangler/**",
+    ".wrangler-dry/**",
+    "node_modules/**",
   ]),
 ]);
 

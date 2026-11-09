@@ -1,8 +1,14 @@
 import { prisma } from "@/lib/db";
 import { recordEvent } from "./events";
-import type { ItemStatus } from "@/generated/prisma/enums";
 import { DateTime } from "luxon";
-import { daysUntilDeadline, isOverdue, toDisplayStatus, type ItemDisplayStatus } from "@/lib/status";
+import {
+  daysUntilDeadline,
+  isOverdue,
+  toDisplayStatus,
+  toItemStatus,
+  type ItemDisplayStatus,
+  type ItemStatus,
+} from "@/lib/status";
 import { planDeadlineReminders, planRefundReminders, normalizeOffsets } from "@/lib/reminders";
 
 /**
@@ -50,7 +56,8 @@ function shape(
     id: string;
     name: string;
     returnDeadline: Date;
-    status: ItemStatus;
+    /** Raw column value; narrowed with toItemStatus. */
+    status: string;
     archivedAt: Date | null;
     amountCents: number | null;
     currency: string | null;
@@ -74,8 +81,8 @@ function shape(
     orderNumber: row.order.orderNumber,
     purchaseDate: toISO(row.order.purchaseDate) ?? "",
     returnDeadline: deadlineISO,
-    status: row.status,
-    displayStatus: toDisplayStatus(row.status, deadlineISO, timezone, now),
+    status: toItemStatus(row.status),
+    displayStatus: toDisplayStatus(toItemStatus(row.status), deadlineISO, timezone, now),
     daysRemaining: daysUntilDeadline(deadlineISO, timezone, now),
     isOverdue: isOverdue(deadlineISO, timezone, now),
     archivedAt: row.archivedAt,
@@ -123,9 +130,9 @@ export async function listPurchases(
     ...(search
       ? {
           OR: [
-            { name: { contains: search, mode: "insensitive" as const } },
-            { order: { storeName: { contains: search, mode: "insensitive" as const } } },
-            { order: { orderNumber: { contains: search, mode: "insensitive" as const } } },
+            { name: { contains: search } },
+            { order: { storeName: { contains: search } } },
+            { order: { orderNumber: { contains: search } } },
           ],
         }
       : {}),
@@ -153,6 +160,7 @@ export interface PurchaseDetail extends PurchaseListItem {
   returnNotes: string | null;
   attachments: Array<{
     id: string;
+    storageKey: string;
     originalFilename: string;
     contentType: string;
     sizeBytes: number;
@@ -177,6 +185,7 @@ export async function getPurchase(
       attachments: {
         select: {
           id: true,
+          storageKey: true,
           originalFilename: true,
           contentType: true,
           sizeBytes: true,
@@ -236,12 +245,16 @@ function dateOnly(iso: string): Date {
 }
 
 /**
- * Creates an order + item in one transaction and schedules future reminders.
+ * Creates an order + item and schedules future reminders.
  * Reminders are materialised as rows immediately so the worker only has to find
  * due rows (and idempotency comes from the unique key).
  */
 export async function createPurchase(args: CreatePurchaseArgs, now: Date = new Date()) {
-  return prisma.$transaction(async (tx) => {
+  // Cloudflare D1 does not support interactive transactions, so these steps
+  // run sequentially. Each one is still scoped to userId; a mid-way failure
+  // leaves a partial write rather than rolling back.
+  return (async () => {
+    const tx = prisma;
     const order = await tx.order.create({
       data: {
         userId: args.userId,
@@ -306,7 +319,7 @@ export async function createPurchase(args: CreatePurchaseArgs, now: Date = new D
     }
 
     return item;
-  });
+  })();
 }
 
 export interface UpdatePurchaseArgs {
@@ -329,7 +342,11 @@ export interface UpdatePurchaseArgs {
  * from scratch, while already-sent rows are kept for audit.
  */
 export async function updatePurchase(args: UpdatePurchaseArgs, now: Date = new Date()) {
-  return prisma.$transaction(async (tx) => {
+  // Cloudflare D1 does not support interactive transactions, so these steps
+  // run sequentially. Each one is still scoped to userId; a mid-way failure
+  // leaves a partial write rather than rolling back.
+  return (async () => {
+    const tx = prisma;
     const existing = await tx.item.findFirst({
       where: { id: args.itemId, userId: args.userId },
       select: {
@@ -420,7 +437,7 @@ export async function updatePurchase(args: UpdatePurchaseArgs, now: Date = new D
         offsets: normalizeOffsets(user.reminderOffsets),
         hour: user.reminderHour,
         now,
-        status: item.status,
+        status: toItemStatus(item.status),
         archivedAt: item.archivedAt,
       });
       for (const p of planned) {
@@ -448,7 +465,7 @@ export async function updatePurchase(args: UpdatePurchaseArgs, now: Date = new D
         timezone: user.timezone,
         hour: user.reminderHour,
         now,
-        status: item.status,
+        status: toItemStatus(item.status),
         archivedAt: item.archivedAt,
       });
       for (const p of refund.reminders) {
@@ -473,20 +490,23 @@ export async function updatePurchase(args: UpdatePurchaseArgs, now: Date = new D
     }
 
     return item;
-  });
+  })();
 }
 
 /**
- * Records a status change and reshapes the reminder queue in the same
- * transaction, so a status change can never leave a stale deadline reminder
- * scheduled (the spec's "changing status suppresses no-longer-relevant
- * reminders" requirement).
+ * Records a status change and reshapes the reminder queue. Stale deadline
+ * reminders are cancelled before new ones are planned, which satisfies the
+ * spec's "changing status suppresses no-longer-relevant reminders" requirement.
  */
 export async function changeItemStatus(
   args: { userId: string; itemId: string; to: ItemStatus; note?: string | null },
   now: Date = new Date(),
 ) {
-  return prisma.$transaction(async (tx) => {
+  // Cloudflare D1 does not support interactive transactions, so these steps
+  // run sequentially. Each one is still scoped to userId; a mid-way failure
+  // leaves a partial write rather than rolling back.
+  return (async () => {
+    const tx = prisma;
     const existing = await tx.item.findFirst({
       where: { id: args.itemId, userId: args.userId },
       select: {
@@ -494,10 +514,22 @@ export async function changeItemStatus(
         status: true,
         returnDeadline: true,
         archivedAt: true,
-        return: { select: { returnedAt: true, expectedRefundDate: true } },
+        return: {
+          select: {
+            returnedAt: true,
+            expectedRefundDate: true,
+            returnStartedAt: true,
+            refundReceivedAt: true,
+          },
+        },
       },
     });
     if (!existing) throw new Response("Not found", { status: 404 });
+
+    const user = await tx.user.findUniqueOrThrow({
+      where: { id: args.userId },
+      select: { timezone: true, reminderOffsets: true, reminderHour: true },
+    });
 
     const item = await tx.item.update({
       where: { id: args.itemId },
@@ -506,6 +538,29 @@ export async function changeItemStatus(
         ...(args.note !== undefined ? { notes: args.note } : {}),
       },
     });
+
+    // Record the return dates the moment the user says they happened, unless
+    // they already entered a more precise date in the return-details form. This
+    // is what lets a refund check-in be suggested 14 days after the return.
+    const todayISO = DateTime.fromJSDate(now, { zone: "utc" }).setZone(user.timezone).toISODate();
+    const returnPatch: { returnStartedAt?: Date; returnedAt?: Date; refundReceivedAt?: Date } = {};
+    const returnStarted = args.to === "RETURN_STARTED" || args.to === "RETURNED" || args.to === "REFUND_PENDING" || args.to === "REFUND_RECEIVED";
+    const returned = args.to === "RETURNED" || args.to === "REFUND_PENDING" || args.to === "REFUND_RECEIVED";
+    if (todayISO) {
+      if (returnStarted && !existing.return?.returnStartedAt) returnPatch.returnStartedAt = dateOnly(todayISO);
+      if (returned && !existing.return?.returnedAt) returnPatch.returnedAt = dateOnly(todayISO);
+    }
+    if (args.to === "REFUND_RECEIVED" && !existing.return?.refundReceivedAt) {
+      returnPatch.refundReceivedAt = now;
+    }
+    if (Object.keys(returnPatch).length > 0) {
+      await tx.return.upsert({
+        where: { itemId: args.itemId },
+        create: { userId: args.userId, itemId: args.itemId, ...returnPatch },
+        update: returnPatch,
+      });
+    }
+    const effectiveReturnedAt = returnPatch.returnedAt ?? existing.return?.returnedAt ?? null;
 
     await recordEvent({
       userId: args.userId,
@@ -520,10 +575,6 @@ export async function changeItemStatus(
       data: { status: "CANCELLED" },
     });
 
-    const user = await tx.user.findUniqueOrThrow({
-      where: { id: args.userId },
-      select: { timezone: true, reminderOffsets: true, reminderHour: true },
-    });
     const deadlineISO = toISO(item.returnDeadline) ?? "";
 
     const planned = planDeadlineReminders({
@@ -532,16 +583,16 @@ export async function changeItemStatus(
       offsets: normalizeOffsets(user.reminderOffsets),
       hour: user.reminderHour,
       now,
-      status: item.status,
+      status: toItemStatus(item.status),
       archivedAt: item.archivedAt,
     });
     const refund = planRefundReminders({
       expectedRefundDateISO: toISO(existing.return?.expectedRefundDate),
-      returnedAt: existing.return?.returnedAt ?? null,
+      returnedAt: effectiveReturnedAt,
       timezone: user.timezone,
       hour: user.reminderHour,
       now,
-      status: item.status,
+      status: toItemStatus(item.status),
       archivedAt: item.archivedAt,
     });
 
@@ -566,12 +617,16 @@ export async function changeItemStatus(
     }
 
     return item;
-  });
+  })();
 }
 
 /** Hard delete. Attachments rows cascade; storage objects are removed by the caller. */
 export async function deletePurchase(userId: string, itemId: string): Promise<string[]> {
-  return prisma.$transaction(async (tx) => {
+  // Cloudflare D1 does not support interactive transactions, so these steps
+  // run sequentially. Each one is still scoped to userId; a mid-way failure
+  // leaves a partial write rather than rolling back.
+  return (async () => {
+    const tx = prisma;
     const item = await tx.item.findFirst({
       where: { id: itemId, userId },
       select: { orderId: true, attachments: { select: { storageKey: true } } },
@@ -586,7 +641,7 @@ export async function deletePurchase(userId: string, itemId: string): Promise<st
     if (remaining === 0) await tx.order.delete({ where: { id: item.orderId } });
 
     return keys;
-  });
+  })();
 }
 
 export interface DashboardSections {
@@ -602,10 +657,7 @@ export interface DashboardSections {
  * returns whose tracking has gone quiet; "refunds pending" holds everything the
  * user has shipped but not yet confirmed money for.
  */
-export function buildDashboardSections(
-  items: PurchaseListItem[],
-  now: Date = new Date(),
-): DashboardSections {
+export function buildDashboardSections(items: PurchaseListItem[]): DashboardSections {
   const overdue = items.filter((i) => i.displayStatus === "EXPIRED");
   const refundsPending = items.filter((i) => i.status === "REFUND_PENDING");
   const upcoming = items

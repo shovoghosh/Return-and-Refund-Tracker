@@ -1,6 +1,15 @@
-import type { ItemStatus } from "@/generated/prisma/enums";
-
-export type { ItemStatus };
+/**
+ * Item status values. SQLite (Cloudflare D1) has no native enum type, so the
+ * column is a plain string and this union plus `isItemStatus` are the runtime
+ * and compile-time source of truth.
+ */
+export type ItemStatus =
+  | "OPEN"
+  | "RETURN_STARTED"
+  | "RETURNED"
+  | "REFUND_PENDING"
+  | "REFUND_RECEIVED"
+  | "KEPT";
 
 /** Display-only status: never persisted. Derived from deadline + OPEN status. */
 export type ItemDisplayStatus = ItemStatus | "EXPIRED";
@@ -80,6 +89,15 @@ const RULES: Record<ItemStatus, TransitionRule> = {
 
 export function isItemStatus(value: unknown): value is ItemStatus {
   return typeof value === "string" && (KNOWN_STATUSES as readonly string[]).includes(value);
+}
+
+/**
+ * Narrows a value read from the database. SQLite returns a plain string for the
+ * status column; an unrecognised value falls back to OPEN rather than crashing
+ * a page, and stays correctable in the UI.
+ */
+export function toItemStatus(value: string): ItemStatus {
+  return isItemStatus(value) ? value : "OPEN";
 }
 
 /**

@@ -1,0 +1,42 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "return-tracker",
+  "main": "./custom-worker.ts",
+  "compatibility_date": "2026-11-09",
+  "compatibility_flags": ["nodejs_compat"],
+  // Static Next assets. OpenNext writes them to .open-next/assets.
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // Private attachments. Create the bucket once with:
+  //   npx wrangler r2 bucket create return-tracker-uploads
+  "r2_buckets": [
+    {
+      "binding": "UPLOADS",
+      "bucket_name": "return-tracker-uploads"
+    }
+  ],
+  // The application database. Create it once with:
+  //   npx wrangler d1 create return-tracker
+  // then paste the printed database_id here.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "return-tracker",
+      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+    }
+  ],
+  // Reminder sweep. The scheduled handler calls POST /api/cron/reminders.
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
+  "observability": {
+    "enabled": true
+  },
+  // APP_URL must be the public origin of this Worker (custom domain or
+  // workers.dev URL). Email links and the cron self-call use it.
+  "vars": {
+    "APP_URL": "https://return-tracker.REPLACE_ME.workers.dev"
+  }
+}
