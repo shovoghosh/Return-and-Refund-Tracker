@@ -24,7 +24,7 @@
     {
       "binding": "DB",
       "database_name": "return-tracker",
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+      "database_id": "6a4deea2-0917-4cdb-bd60-70ca0a0c3eac"
     }
   ],
   // Reminder sweep. The scheduled handler calls POST /api/cron/reminders.

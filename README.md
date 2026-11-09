@@ -163,6 +163,10 @@ purging storage keys.
 
 ## One-time Cloudflare setup
 
+This repository is already wired to the project's D1 database and R2 bucket (see
+`wrangler.jsonc`). The commands below are what was run once, and what a fork must repeat with
+its own resource names and ids.
+
 ```bash
 npx wrangler login
 
