@@ -197,7 +197,7 @@ handler sends it automatically.
 2. In the Cloudflare dashboard: **Workers & Pages → Create → Workers → Connect to Git**, and
    pick the repository.
 3. Build settings:
-   - **Build command:** `npx opennextjs-cloudflare build`
+   - **Build command:** `npx prisma generate && npx opennextjs-cloudflare build`
    - **Deploy command:** `npx wrangler deploy`
    - **Root directory:** `/`
    - **Node version:** 22 (a `.nvmrc` is included)
