@@ -1,9 +1,12 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "return-tracker",
+  "name": "return-and-refund-tracker",
   "main": "./custom-worker.ts",
   "compatibility_date": "2026-11-09",
   "compatibility_flags": ["nodejs_compat"],
+  // Serve on the workers.dev URL; version preview URLs are not needed.
+  "workers_dev": true,
+  "preview_urls": false,
   // Static Next assets. OpenNext writes them to .open-next/assets.
   "assets": {
     "directory": ".open-next/assets",
@@ -37,6 +40,6 @@
   // APP_URL must be the public origin of this Worker (custom domain or
   // workers.dev URL). Email links and the cron self-call use it.
   "vars": {
-    "APP_URL": "https://return-tracker.REPLACE_ME.workers.dev"
+    "APP_URL": "https://return-and-refund-tracker.suvo.workers.dev"
   }
 }
