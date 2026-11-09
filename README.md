@@ -148,7 +148,8 @@ curl "http://127.0.0.1:8787/cdn-cgi/local/scheduled"
 npm test            # vitest, 105 tests
 npm run typecheck   # tsc --noEmit
 npm run lint        # eslint
-npm run build       # plain Next build
+npm run build       # OpenNext build (what Workers Builds runs)
+npm run build:next  # plain `next build` for a quick check
 npm run preview     # OpenNext build + workerd preview
 ```
 
@@ -197,7 +198,7 @@ handler sends it automatically.
 2. In the Cloudflare dashboard: **Workers & Pages → Create → Workers → Connect to Git**, and
    pick the repository.
 3. Build settings:
-   - **Build command:** `npx prisma generate && npx opennextjs-cloudflare build`
+   - **Build command:** `npm run build` (runs the OpenNext build; `prisma generate` runs in `postinstall`)
    - **Deploy command:** `npx wrangler deploy`
    - **Root directory:** `/`
    - **Node version:** 22 (a `.nvmrc` is included)

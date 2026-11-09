@@ -3,8 +3,18 @@ import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 /**
  * OpenNext configuration for Cloudflare Workers.
  *
- * Defaults are correct for this app: every page is either static or rendered on
- * demand, and there is no ISR, so no incremental cache binding is needed. If
- * caching is added later, see https://opennext.js.org/cloudflare/caching.
+ * `buildCommand` is what `opennextjs-cloudflare build` runs to build the Next
+ * app. It must point at a dedicated script: OpenNext's default is
+ * `npm run build`, and `build` is the OpenNext build itself (so the default
+ * would recurse). Keeping `build` as the OpenNext build is deliberate — that is
+ * the command Cloudflare Workers Builds runs, and it leaves `.open-next/` ready
+ * for `wrangler deploy`.
  */
-export default defineCloudflareConfig();
+const config = defineCloudflareConfig();
+
+const openNextConfig = {
+  ...config,
+  buildCommand: "npm run build:next",
+};
+
+export default openNextConfig;

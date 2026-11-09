@@ -3,8 +3,7 @@ generator client {
   // OpenNext copies Prisma's `workerd` build into the Worker bundle only for
   // packages generated there, and Next traces it as an external package
   // (serverExternalPackages in next.config.ts).
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
