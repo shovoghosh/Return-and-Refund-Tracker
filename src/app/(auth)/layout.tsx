@@ -7,6 +7,7 @@ import {
   Sparkles,
   Wallet,
 } from "lucide-react";
+import { COMPANY_NAME } from "@/lib/brand";
 import { Logo } from "@/components/ui";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -90,10 +91,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </div>
         </div>
 
-        <p className="relative max-w-md text-xs leading-relaxed text-[#f5eee3]/40">
-          Return Tracker keeps the dates you give it. It cannot start a return or issue a refund —
-          it just makes sure you do not miss your chance.
-        </p>
+        <div className="relative max-w-md">
+          <p className="text-xs leading-relaxed text-[#f5eee3]/40">
+            Return Tracker keeps the dates you give it. It cannot start a return or issue a refund —
+            it just makes sure you do not miss your chance.
+          </p>
+          <p className="mt-2 text-[0.62rem] font-medium uppercase tracking-[0.14em] text-[#f5eee3]/35">
+            {COMPANY_NAME}
+          </p>
+        </div>
       </aside>
 
       <div className="relative flex min-h-dvh flex-col">
@@ -131,6 +137,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <Link href="/help" className="link-quiet">
             Help
           </Link>
+          <p className="mt-2 text-[0.62rem] text-muted/80">{COMPANY_NAME}</p>
         </footer>
       </div>
     </div>

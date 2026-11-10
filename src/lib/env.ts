@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { COMPANY_EMAIL, PRODUCT_NAME } from "./brand";
 
 const schema = z.object({
   // Only the Prisma CLI needs a connection string; the app reads D1 through a
@@ -8,8 +9,8 @@ const schema = z.object({
   SESSION_SECRET: z.string().min(16, "SESSION_SECRET must be at least 16 characters"),
   // Resend HTTP API key. Empty means "log the email to stdout" (local dev).
   RESEND_API_KEY: z.string().optional().default(""),
-  EMAIL_FROM: z.string().default("Return Tracker <reminders@example.com>"),
-  SUPPORT_EMAIL: z.string().default("support@example.com"),
+  EMAIL_FROM: z.string().default(`${PRODUCT_NAME} <${COMPANY_EMAIL}>`),
+  SUPPORT_EMAIL: z.string().default(COMPANY_EMAIL),
   UPLOAD_DIR: z.string().default("./uploads"),
   MAX_UPLOAD_MB: z.coerce.number().int().positive().default(10),
   MAX_FILES_PER_ITEM: z.coerce.number().int().positive().default(5),

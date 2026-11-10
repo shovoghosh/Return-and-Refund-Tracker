@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowUpRight, Plus, ShieldCheck } from "lucide-react";
+import { COMPANY_NAME } from "@/lib/brand";
 import { requireUser } from "@/lib/auth-guard";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { Avatar, LinkButton, Logo } from "@/components/ui";
@@ -64,6 +65,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
               Privacy
             </Link>
           </p>
+          <p className="mt-1 px-1 text-[0.58rem] text-muted/80">{COMPANY_NAME}</p>
         </div>
       </aside>
 

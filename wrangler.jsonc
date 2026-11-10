@@ -40,6 +40,8 @@
   // APP_URL must be the public origin of this Worker (custom domain or
   // workers.dev URL). Email links and the cron self-call use it.
   "vars": {
-    "APP_URL": "https://return-and-refund-tracker.suvo.workers.dev"
+    "APP_URL": "https://return-and-refund-tracker.suvo.workers.dev",
+    "EMAIL_FROM": "Return Tracker <contact@mxsxlab.com>",
+    "SUPPORT_EMAIL": "contact@mxsxlab.com"
   }
 }

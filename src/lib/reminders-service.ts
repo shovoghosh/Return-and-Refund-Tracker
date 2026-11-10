@@ -1,4 +1,5 @@
 import { DateTime } from "luxon";
+import { COMPANY_EMAIL, COMPANY_NAME } from "@/lib/brand";
 import { prisma } from "@/lib/db";
 import { getEnv } from "@/lib/env";
 import { recordEvent } from "@/lib/dal";
@@ -371,6 +372,8 @@ export function buildReminderEmail(row: DueReminder): {
       "Return Tracker never confirms refunds for you — you tell it when the money actually arrives.",
       "",
       "You are receiving this because you asked Return Tracker to remind you about this return.",
+      "",
+      `${COMPANY_NAME} · ${COMPANY_EMAIL}`,
     ].join("\n");
 
     const html = [
@@ -383,6 +386,7 @@ export function buildReminderEmail(row: DueReminder): {
         : []),
       `<p><a href="${escapeHtml(link)}">Open it in Return Tracker</a></p>`,
       "<p>Return Tracker never confirms refunds for you — you tell it when the money actually arrives.</p>",
+      `<p style="color:#746a5c;font-size:12px">${COMPANY_NAME} · <a href="mailto:${COMPANY_EMAIL}">${COMPANY_EMAIL}</a></p>`,
     ].join("\n");
 
     return { to: row.email, subject, text, html };
@@ -410,6 +414,8 @@ export function buildReminderEmail(row: DueReminder): {
     "Return Tracker never confirms refunds for you — you mark it received yourself once you see the money.",
     "",
     "You are receiving this because you asked Return Tracker to remind you about this refund.",
+    "",
+    `${COMPANY_NAME} · ${COMPANY_EMAIL}`,
   ].join("\n");
 
   const html = [
@@ -420,6 +426,7 @@ export function buildReminderEmail(row: DueReminder): {
     ...(checkInText ? [`<p>You were expecting it around <strong>${escapeHtml(checkInText)}</strong>.</p>`] : []),
     `<p><a href="${escapeHtml(link)}">Open it in Return Tracker</a></p>`,
     "<p>Return Tracker never confirms refunds for you — you mark it received yourself once you see the money.</p>",
+    `<p style="color:#746a5c;font-size:12px">${COMPANY_NAME} · <a href="mailto:${COMPANY_EMAIL}">${COMPANY_EMAIL}</a></p>`,
   ].join("\n");
 
   return { to: row.email, subject, text, html };

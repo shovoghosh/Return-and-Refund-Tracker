@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, Heart, ShieldCheck } from "lucide-react";
+import { COMPANY_EMAIL, COMPANY_NAME, PRODUCT_NAME } from "@/lib/brand";
 import { LinkButton, Logo } from "@/components/ui";
 
 const NAV = [
@@ -57,6 +58,9 @@ export function SiteFooter() {
               A calm, private place for return deadlines, return progress, and the refund you are
               still waiting on.
             </p>
+            <p className="mt-2 text-xs text-muted">
+              {PRODUCT_NAME} is a product of {COMPANY_NAME}.
+            </p>
             <p className="mt-4 inline-flex items-center gap-1.5 text-xs text-muted">
               <ShieldCheck aria-hidden="true" className="size-3.5 text-moss" />
               No inbox access. No bank connection. No ads.
@@ -84,6 +88,9 @@ export function SiteFooter() {
               <Link href="/contact" className="text-foreground-soft transition hover:text-accent">
                 Contact
               </Link>
+              <a href={`mailto:${COMPANY_EMAIL}`} className="text-foreground-soft transition hover:text-accent">
+                {COMPANY_EMAIL}
+              </a>
               <Link href="/sign-in" className="text-foreground-soft transition hover:text-accent">
                 Sign in
               </Link>
@@ -101,8 +108,15 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-10 flex flex-col gap-2 border-t border-border/70 pt-5 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} Return Tracker. Built for real life, not perfect shoppers.</p>
-          <p className="inline-flex items-center gap-1.5">
+          <p>
+            © {new Date().getFullYear()} {COMPANY_NAME} · {PRODUCT_NAME}. Built for real life, not
+            perfect shoppers.
+          </p>
+          <p className="inline-flex flex-wrap items-center gap-1.5">
+            <a href={`mailto:${COMPANY_EMAIL}`} className="link-quiet">
+              {COMPANY_EMAIL}
+            </a>
+            <span aria-hidden="true">·</span>
             Made with <Heart aria-hidden="true" className="size-3.5 text-accent" /> for people with a
             receipt drawer.
           </p>

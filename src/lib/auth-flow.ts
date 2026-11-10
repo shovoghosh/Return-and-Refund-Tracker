@@ -1,3 +1,4 @@
+import { COMPANY_EMAIL, COMPANY_NAME } from "@/lib/brand";
 import { getEnv } from "@/lib/env";
 import { sendMail } from "@/lib/mail";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
@@ -111,6 +112,8 @@ export async function sendVerificationEmail(email: string, rawToken: string): Pr
       link,
       "",
       "This link expires in 24 hours. If you did not create an account, ignore this email.",
+      "",
+      `${COMPANY_NAME} · ${COMPANY_EMAIL}`,
     ].join("\n"),
   });
 }
@@ -128,6 +131,8 @@ export async function sendPasswordResetEmail(email: string, rawToken: string): P
       "",
       "This link expires in 1 hour and can be used once.",
       "If you did not ask for this, you can ignore this email; your password is unchanged.",
+      "",
+      `${COMPANY_NAME} · ${COMPANY_EMAIL}`,
     ].join("\n"),
   });
 }

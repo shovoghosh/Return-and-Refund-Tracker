@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Return Tracker">
+  <defs>
+    <linearGradient id="rt-bg" x1="6" y1="2" x2="58" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D9552B" />
+      <stop offset="1" stop-color="#EEA147" />
+    </linearGradient>
+    <radialGradient id="rt-glow" cx="0" cy="0" r="1" gradientTransform="translate(17 11) rotate(46) scale(44)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.34" />
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#rt-bg)" />
+  <rect width="64" height="64" rx="15" fill="url(#rt-glow)" />
+  <g fill="none" stroke="#FFF8F0" stroke-width="2.65" stroke-linecap="round" stroke-linejoin="round" transform="translate(5.6 5.6) scale(2.2)">
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+  </g>
+</svg>

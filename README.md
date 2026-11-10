@@ -3,6 +3,8 @@
 Track online purchases, get reminded before each store's return deadline, and confirm for
 yourself when the refund actually arrives.
 
+Return Tracker is a product of **MXSXLAB Inc.** Contact: **contact@mxsxlab.com**.
+
 Runs on **Cloudflare Workers** (via OpenNext), with **D1** for data, **R2** for private
 attachments, **Resend** for email, and a **Cron Trigger** for reminders.
 
@@ -92,8 +94,8 @@ Runtime values live in `.dev.vars` for `wrangler`/preview and `.env` for `next d
 | `SESSION_SECRET` | yes | — | ≥16 chars; HMAC key for session and token hashes. Rotating it signs everyone out. |
 | `APP_URL` | yes in production | `http://localhost:3000` | Public origin. Used for links in emails and by the cron self-call. |
 | `RESEND_API_KEY` | no | empty | Empty = log email to stdout instead of sending. |
-| `EMAIL_FROM` | no | `Return Tracker <reminders@example.com>` | Must be a verified Resend sender. |
-| `SUPPORT_EMAIL` | no | `support@example.com` | Address on the contact/privacy/terms pages. |
+| `EMAIL_FROM` | no | `Return Tracker <contact@mxsxlab.com>` | Must be a verified Resend sender. |
+| `SUPPORT_EMAIL` | no | `contact@mxsxlab.com` | Address on the contact/privacy/terms pages. |
 | `CRON_SECRET` | yes in production | empty | When set, the cron endpoint requires `Authorization: Bearer <secret>`. |
 | `UPLOAD_DIR` | no | `./uploads` | Only the `next dev` disk fallback; Workers always use R2. |
 | `MAX_UPLOAD_MB` | no | `10` | Per-file cap. |

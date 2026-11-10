@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { COMPANY_NAME } from "@/lib/brand";
 import { getEnv } from "@/lib/env";
 import { PageHeader } from "@/components/ui";
 
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Terms — Return Tracker",
   description:
-    "The plain-language terms for using Return Tracker: what the service is, what it is not, and what we each agree to.",
+    "The plain-language terms for using Return Tracker by MXSXLAB Inc.: what the service is, what it is not, and what we each agree to.",
 };
 
 const LAST_UPDATED = "November 9, 2026";
@@ -34,13 +35,16 @@ export default function TermsPage() {
         subtitle="Short and in plain language. By creating an account you agree to these terms."
       />
 
-      <p className="text-xs text-muted">Last updated: {LAST_UPDATED}</p>
+      <p className="text-xs text-muted">
+        Last updated: {LAST_UPDATED} · Operated by {COMPANY_NAME}
+      </p>
 
       <Section title="What this service is">
         <p className="text-sm text-muted">
-          Return Tracker is a personal record-keeping tool. You enter purchases, the return-by date a
-          store gave you, and details of any return or refund. The app stores those records, displays
-          them in your time zone, and sends you the reminders you configure.
+          Return Tracker is a personal record-keeping tool operated by {COMPANY_NAME}. You enter
+          purchases, the return-by date a store gave you, and details of any return or refund. The
+          app stores those records, displays them in your time zone, and sends you the reminders you
+          configure. These terms are between you and {COMPANY_NAME}.
         </p>
       </Section>
 
@@ -162,7 +166,7 @@ export default function TermsPage() {
 
       <Section title="Contact">
         <p className="text-sm text-muted">
-          Questions about these terms: email{" "}
+          Questions about these terms, or about {COMPANY_NAME}: email{" "}
           <a className="font-medium text-foreground underline underline-offset-2" href={`mailto:${SUPPORT_EMAIL}`}>
             {SUPPORT_EMAIL}
           </a>{" "}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { COMPANY_NAME } from "@/lib/brand";
 import { getEnv } from "@/lib/env";
 import { PageHeader } from "@/components/ui";
 
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Privacy — Return Tracker",
   description:
-    "What Return Tracker stores, why it stores it, who can see it, and how to export or delete it.",
+    "What Return Tracker, a product of MXSXLAB Inc., stores, why it stores it, who can see it, and how to export or delete it.",
 };
 
 const LAST_UPDATED = "November 9, 2026";
@@ -38,7 +39,9 @@ export default function PrivacyPage() {
         subtitle="A purchase history can reveal a lot about someone. Here is exactly what this app keeps, and what it does not."
       />
 
-      <p className="text-xs text-muted">Last updated: {LAST_UPDATED}</p>
+      <p className="text-xs text-muted">
+        Last updated: {LAST_UPDATED} · Operated by {COMPANY_NAME}
+      </p>
 
       <Section title="The short version">
         <List>
@@ -186,7 +189,8 @@ export default function PrivacyPage() {
 
       <Section title="Contact">
         <p className="text-sm text-muted">
-          Questions about privacy, or a request to access or delete your data: email{" "}
+          {COMPANY_NAME}, which operates Return Tracker, handles privacy questions and requests to
+          access or delete your data. Email{" "}
           <a className="font-medium text-foreground underline underline-offset-2" href={`mailto:${SUPPORT_EMAIL}`}>
             {SUPPORT_EMAIL}
           </a>

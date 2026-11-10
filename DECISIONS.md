@@ -48,9 +48,10 @@ are the accepted trade-offs for zero-account, edge-native deployment.
 ## D10 — Public info pages; privacy and terms are drafts pending review
 
 `/help`, `/contact`, `/privacy`, and `/terms` are public (no session) so a visitor can judge the
-product and its data handling before signing up, as the plan requires. The support address is
-`SUPPORT_EMAIL` in the environment rather than a literal in the UI, and the contact page renders
-per request (`force-dynamic`) so changing the address does not require a rebuild.
+product and its data handling before signing up, as the plan requires. Return Tracker is operated
+by **MXSXLAB Inc.**; the support address is `SUPPORT_EMAIL` in the environment (default
+`contact@mxsxlab.com`) rather than a literal in the UI, and the contact page renders per request
+(`force-dynamic`) so changing the address does not require a rebuild.
 
 The privacy and terms pages describe what the code actually does today — including the honest
 caveats (backup rotation, at-most-once email, private R2 storage). They are plain-language

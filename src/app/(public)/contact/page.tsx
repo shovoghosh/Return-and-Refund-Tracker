@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Bug, LifeBuoy, Mail, ShieldCheck } from "lucide-react";
+import { COMPANY_NAME } from "@/lib/brand";
 import { getEnv } from "@/lib/env";
 import { Card, IconTile, PageHeader, buttonStyles } from "@/components/ui";
 
@@ -14,7 +15,8 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Contact — Return Tracker",
-  description: "Report a bug, ask for help, tell us about a privacy request, or flag a security issue.",
+  description:
+    "Contact MXSXLAB Inc. to report a bug, ask for help, make a privacy request, or flag a security issue.",
 };
 
 const BUG_SUBJECT = "Return Tracker: bug report";
@@ -31,7 +33,7 @@ export default function ContactPage() {
       <PageHeader
         eyebrow="Talk to a person"
         title="Contact"
-        subtitle="One person reads this inbox. Say what happened and we will get back to you."
+        subtitle={`${COMPANY_NAME} reads this inbox. Say what happened and we will get back to you.`}
       />
 
       <Card padding="lg" className="relative overflow-hidden">
@@ -44,7 +46,10 @@ export default function ContactPage() {
             <Mail />
           </IconTile>
           <div>
-            <p className="text-sm font-semibold">Email</p>
+            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.13em] text-muted">
+              {COMPANY_NAME}
+            </p>
+            <p className="mt-1 text-sm font-semibold">Email</p>
             <a
               className="mt-1 inline-block break-all font-display text-xl font-semibold tracking-[-0.02em] text-foreground underline decoration-accent/40 decoration-2 underline-offset-4 hover:decoration-accent"
               href={`mailto:${SUPPORT_EMAIL}`}

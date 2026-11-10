@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Geist, Geist_Mono } from "next/font/google";
+import { COMPANY_NAME, PRODUCT_NAME } from "@/lib/brand";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,7 +25,17 @@ export const metadata: Metadata = {
   title: "Return Tracker — never miss a return deadline again",
   description:
     "Track online purchases, get reminded before return deadlines, and confirm your refunds arrived.",
-  applicationName: "Return Tracker",
+  applicationName: PRODUCT_NAME,
+  authors: [{ name: COMPANY_NAME }],
+  creator: COMPANY_NAME,
+  publisher: COMPANY_NAME,
+  openGraph: {
+    title: "Return Tracker — never miss a return deadline again",
+    description:
+      "Track online purchases, get reminded before return deadlines, and confirm your refunds arrived.",
+    siteName: PRODUCT_NAME,
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {

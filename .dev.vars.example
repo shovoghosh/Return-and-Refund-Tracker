@@ -4,8 +4,8 @@ SESSION_SECRET="REPLACE_WITH_A_RANDOM_STRING_OF_AT_LEAST_32_CHARS"
 
 # Empty = print emails to the terminal instead of sending.
 RESEND_API_KEY=""
-EMAIL_FROM="Return Tracker <reminders@example.com>"
-SUPPORT_EMAIL="support@example.com"
+EMAIL_FROM="Return Tracker <contact@mxsxlab.com>"
+SUPPORT_EMAIL="contact@mxsxlab.com"
 
 # Required by the scheduled handler and the cron endpoint when set.
 CRON_SECRET=""
