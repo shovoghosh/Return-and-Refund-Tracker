@@ -33,6 +33,7 @@ export default function PrivacyPage() {
   return (
     <article className="flex max-w-3xl flex-col gap-8">
       <PageHeader
+        eyebrow="Your data"
         title="Privacy"
         subtitle="A purchase history can reveal a lot about someone. Here is exactly what this app keeps, and what it does not."
       />

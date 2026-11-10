@@ -1,5 +1,17 @@
 import Link from "next/link";
-import { StatusBadge } from "@/components/ui";
+import {
+  Archive,
+  BadgeCheck,
+  CalendarDays,
+  ChevronRight,
+  Hourglass,
+  Package,
+  RotateCcw,
+  TriangleAlert,
+  Truck,
+  type LucideIcon,
+} from "lucide-react";
+import { Badge, IconTile, StatusBadge } from "@/components/ui";
 import { STATUS_LABELS, formatDeadline } from "@/lib/status";
 import type { PurchaseListItem } from "@/lib/dal";
 
@@ -35,6 +47,16 @@ export function daysText(days: number): string {
   return past === 1 ? "1 day past the deadline" : `${past} days past the deadline`;
 }
 
+const STATUS_ICONS: Record<string, { icon: LucideIcon; tone: "accent" | "warm" | "sky" | "moss" | "lilac" | "danger" | "neutral" }> = {
+  OPEN: { icon: Package, tone: "sky" },
+  RETURN_STARTED: { icon: RotateCcw, tone: "warm" },
+  RETURNED: { icon: Truck, tone: "lilac" },
+  REFUND_PENDING: { icon: Hourglass, tone: "warm" },
+  REFUND_RECEIVED: { icon: BadgeCheck, tone: "moss" },
+  KEPT: { icon: Archive, tone: "neutral" },
+  EXPIRED: { icon: TriangleAlert, tone: "danger" },
+};
+
 export function PurchaseRow({
   item,
   timezone,
@@ -49,43 +71,89 @@ export function PurchaseRow({
   const refundDate = item.expectedRefundDate
     ? formatDeadline(item.expectedRefundDate, timezone)
     : null;
+  const meta = STATUS_ICONS[item.displayStatus] ?? STATUS_ICONS.OPEN;
+  const StatusIcon = meta.icon;
+  const urgent = item.displayStatus === "EXPIRED" || item.daysRemaining === 0;
 
   return (
-    <li className="border-b border-border last:border-b-0">
+    <li className="border-b border-border/60 last:border-b-0">
       <Link
         href={`/purchases/${item.id}`}
-        className="flex flex-col gap-2 rounded-lg px-2 py-3 transition hover:bg-accent/5 sm:px-3"
+        className="group flex items-start gap-3 rounded-xl px-2.5 py-3.5 transition-colors duration-200 hover:bg-surface-2/65 sm:px-3"
       >
-        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
-          <span className="text-sm font-semibold text-foreground">{item.name}</span>
-          <StatusBadge status={item.displayStatus} label={STATUS_LABELS[item.displayStatus]} />
-        </div>
+        <IconTile tone={meta.tone} size="md" className="mt-0.5">
+          <StatusIcon />
+        </IconTile>
 
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-          <span>{item.storeName}</span>
-          {item.orderNumber ? <span>Order {item.orderNumber}</span> : null}
-          {money ? <span className="font-medium text-foreground">{money}</span> : null}
-        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1.5">
+            <div className="min-w-0">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <span className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-accent">
+                  {item.name}
+                </span>
+                {item.archivedAt ? (
+                  <Badge tone="neutral" icon={<Archive className="size-3" aria-hidden="true" />}>
+                    Archived
+                  </Badge>
+                ) : null}
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[0.72rem] text-muted">
+                <span>{item.storeName}</span>
+                {item.orderNumber ? (
+                  <>
+                    <span aria-hidden="true" className="size-1 rounded-full bg-border-strong" />
+                    <span>Order {item.orderNumber}</span>
+                  </>
+                ) : null}
+                {money ? (
+                  <>
+                    <span aria-hidden="true" className="size-1 rounded-full bg-border-strong" />
+                    <span className="font-semibold text-foreground-soft">{money}</span>
+                  </>
+                ) : null}
+              </div>
+            </div>
+            <StatusBadge status={item.displayStatus} label={STATUS_LABELS[item.displayStatus]} />
+          </div>
 
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-          <span className="text-foreground">
-            {item.isOverdue ? "Return deadline was " : "Return by "}
-            <span className="font-medium">{deadline}</span>
-          </span>
-          {daysText(item.daysRemaining) ? (
-            <span className="text-muted">{daysText(item.daysRemaining)}</span>
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+            <span className="chip">
+              <CalendarDays className="size-3 text-muted" aria-hidden="true" />
+              {item.isOverdue ? "Was due " : "Return by "}
+              <span className="font-semibold text-foreground-soft">{deadline}</span>
+            </span>
+            {daysText(item.daysRemaining) ? (
+              <span
+                className={
+                  urgent
+                    ? "text-[0.7rem] font-semibold text-danger"
+                    : item.daysRemaining <= 7
+                      ? "text-[0.7rem] font-medium text-warn"
+                      : "text-[0.7rem] text-muted"
+                }
+              >
+                {daysText(item.daysRemaining)}
+              </span>
+            ) : null}
+          </div>
+
+          {showRefund && refundDate ? (
+            <div className="mt-2 rounded-lg border border-border/70 bg-surface-2/50 px-2.5 py-1.5 text-[0.7rem] leading-relaxed text-muted">
+              Refund expected{" "}
+              <span className="font-semibold text-foreground-soft">{refundDate}</span>
+              {item.expectedRefundCents !== null
+                ? ` (${formatMoney(item.expectedRefundCents, item.currency)})`
+                : ""}{" "}
+              — a reminder you set, not a promise from the store.
+            </div>
           ) : null}
         </div>
 
-        {showRefund && refundDate ? (
-          <div className="text-xs text-muted">
-            Refund expected <span className="font-medium text-foreground">{refundDate}</span>
-            {item.expectedRefundCents !== null
-              ? ` (${formatMoney(item.expectedRefundCents, item.currency)})`
-              : ""}{" "}
-            — a reminder you set, not a promise from the store.
-          </div>
-        ) : null}
+        <ChevronRight
+          aria-hidden="true"
+          className="mt-2 size-4 shrink-0 text-border-strong transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent"
+        />
       </Link>
     </li>
   );

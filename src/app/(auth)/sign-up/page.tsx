@@ -11,12 +11,13 @@ export default async function SignUpPage() {
   if (user) redirect(user.emailVerifiedAt ? "/dashboard" : "/verify-email");
 
   return (
-    <Card>
+    <Card padding="lg" className="animate-fade-up">
       <PageHeader
+        eyebrow="Free to start"
         title="Create your account"
         subtitle="Track purchases, catch return deadlines, and confirm refunds arrived."
       />
-      <div className="mt-5">
+      <div className="mt-6">
         <SignUpForm />
       </div>
     </Card>

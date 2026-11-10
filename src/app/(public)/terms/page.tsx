@@ -29,6 +29,7 @@ export default function TermsPage() {
   return (
     <article className="flex max-w-3xl flex-col gap-8">
       <PageHeader
+        eyebrow="The fine print"
         title="Terms"
         subtitle="Short and in plain language. By creating an account you agree to these terms."
       />

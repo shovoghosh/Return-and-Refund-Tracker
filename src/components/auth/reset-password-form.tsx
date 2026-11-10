@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import { LockKeyhole } from "lucide-react";
 import { Field, Input } from "@/components/ui";
 import { FormFeedback, SubmitButton } from "@/components/auth/form-primitives";
 import { resetPasswordAction } from "@/app/(auth)/actions";
@@ -27,6 +28,8 @@ export function ResetPasswordForm({ token }: { token: string }) {
           name="password"
           type="password"
           autoComplete="new-password"
+          placeholder="At least 8 characters"
+          leadingIcon={<LockKeyhole />}
           required
           minLength={8}
         />
@@ -37,12 +40,16 @@ export function ResetPasswordForm({ token }: { token: string }) {
           name="confirmPassword"
           type="password"
           autoComplete="new-password"
+          placeholder="Same password again"
+          leadingIcon={<LockKeyhole />}
           required
         />
       </Field>
-      <SubmitButton pendingLabel="Saving…">Set new password</SubmitButton>
+      <SubmitButton pendingLabel="Saving…" className="w-full">
+        Set new password
+      </SubmitButton>
       <p className="text-sm text-muted">
-        <Link className="font-medium text-accent underline" href="/sign-in">
+        <Link className="font-medium text-accent underline-offset-4 hover:underline" href="/sign-in">
           Back to sign in
         </Link>
       </p>

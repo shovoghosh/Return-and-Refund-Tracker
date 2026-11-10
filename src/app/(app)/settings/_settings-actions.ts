@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth-guard";
 import { destroyCurrentSession } from "@/lib/auth";
 import { deleteAccount } from "@/lib/dal";
@@ -86,6 +87,10 @@ export async function saveSettingsAction(
     "ok" in result &&
     (result as { ok?: unknown }).ok === true
   ) {
+    // The form is uncontrolled for progressive enhancement, so refresh the
+    // server-rendered defaults after a successful save. Without this, a
+    // checkbox that was just cleared would still render its old state.
+    revalidatePath("/settings");
     return { errors: {}, saved: true };
   }
 

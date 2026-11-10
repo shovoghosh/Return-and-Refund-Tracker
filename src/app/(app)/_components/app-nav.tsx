@@ -1,103 +1,149 @@
 "use client";
 
-import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Bell,
+  Download,
+  LayoutDashboard,
+  Plus,
+  Settings2,
+  type LucideIcon,
+} from "lucide-react";
 import { cx } from "@/components/ui";
 
 /**
- * The app shell navigation. Rendered once by the authenticated (app) layout.
+ * App shell navigation.
  *
- * Mobile-first: on a narrow phone it is a fixed, thumb-reachable bottom bar with
- * full-height tap targets; from `sm` up it becomes a normal inline nav row. The
- * active link is marked with `aria-current="page"` and a weight change, never by
- * colour alone.
+ * Desktop: a quiet sidebar list with an animated active pill.
+ * Mobile: a thumb-reachable, glassy bottom bar with a raised "add" action.
+ * The active item always carries `aria-current="page"` and a text label.
  */
 
 interface NavItem {
   href: string;
   label: string;
-  icon: ReactNode;
-}
-
-function Icon({ children }: { children: ReactNode }) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="size-6 sm:size-5"
-    >
-      {children}
-    </svg>
-  );
+  icon: LucideIcon;
+  special?: boolean;
 }
 
 const ITEMS: NavItem[] = [
-  {
-    href: "/dashboard",
-    label: "Dashboard",
-    icon: (
-      <Icon>
-        <rect x="3" y="3" width="7" height="7" rx="1.5" />
-        <rect x="14" y="3" width="7" height="7" rx="1.5" />
-        <rect x="3" y="14" width="7" height="7" rx="1.5" />
-        <rect x="14" y="14" width="7" height="7" rx="1.5" />
-      </Icon>
-    ),
-  },
-  {
-    href: "/notifications",
-    label: "Notifications",
-    icon: (
-      <Icon>
-        <path d="M18 8a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7" />
-        <path d="M10.5 20a2 2 0 0 0 3 0" />
-      </Icon>
-    ),
-  },
-  {
-    href: "/settings",
-    label: "Settings",
-    icon: (
-      <Icon>
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
-      </Icon>
-    ),
-  },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/notifications", label: "Notifications", icon: Bell },
+  { href: "/purchases/new", label: "Add", icon: Plus, special: true },
+  { href: "/settings", label: "Settings", icon: Settings2 },
+  { href: "/export", label: "Export", icon: Download },
 ];
 
-export function AppNav() {
+function isActive(pathname: string, href: string): boolean {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function AppNav({ variant = "sidebar" }: { variant?: "sidebar" | "mobile" }) {
   const pathname = usePathname() ?? "";
 
+  if (variant === "mobile") {
+    return (
+      <nav
+        aria-label="Main"
+        className="glass-bar fixed inset-x-0 bottom-0 z-40 border-t border-border/80 pb-[env(safe-area-inset-bottom)] lg:hidden"
+      >
+        <ul className="mx-auto flex w-full max-w-lg items-end justify-around px-3">
+          {ITEMS.map((item) => {
+            const active = isActive(pathname, item.href);
+            const Icon = item.icon;
+
+            if (item.special) {
+              return (
+                <li key={item.href} className="-mt-5">
+                  <Link
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    aria-label="Add purchase"
+                    className="group flex flex-col items-center gap-1"
+                  >
+                    <span
+                      className={cx(
+                        "grid size-12 place-items-center rounded-2xl border border-white/20 bg-[linear-gradient(145deg,var(--accent),var(--accent-2))] text-accent-fg shadow-[0_12px_28px_-12px_var(--ring)] transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-95",
+                        active && "ring-2 ring-accent/40 ring-offset-2 ring-offset-background",
+                      )}
+                    >
+                      <Icon className="size-5" strokeWidth={2.4} aria-hidden="true" />
+                    </span>
+                    <span className={cx("text-[0.62rem] font-semibold", active ? "text-accent" : "text-muted")}>
+                      Add
+                    </span>
+                  </Link>
+                </li>
+              );
+            }
+
+            return (
+              <li key={item.href} className="flex-1">
+                <Link
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cx(
+                    "relative flex min-h-[3.6rem] flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[0.62rem] font-semibold transition",
+                    active ? "text-accent" : "text-muted hover:text-foreground",
+                  )}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cx(
+                      "absolute top-0 h-0.5 w-6 rounded-full bg-accent transition-opacity",
+                      active ? "opacity-100" : "opacity-0",
+                    )}
+                  />
+                  <Icon
+                    className={cx("size-[1.35rem] transition-transform", active && "-translate-y-px")}
+                    strokeWidth={active ? 2.2 : 1.9}
+                    aria-hidden="true"
+                  />
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    );
+  }
+
   return (
-    <nav
-      aria-label="Main"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] sm:static sm:z-auto sm:rounded-xl sm:border sm:pb-0"
-    >
-      <ul className="mx-auto flex w-full max-w-5xl sm:max-w-none">
-        {ITEMS.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    <nav aria-label="Main">
+      <ul className="flex flex-col gap-1">
+        {ITEMS.filter((item) => !item.special).map((item) => {
+          const active = isActive(pathname, item.href);
+          const Icon = item.icon;
           return (
-            <li key={item.href} className="flex-1 sm:flex-none">
+            <li key={item.href}>
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cx(
-                  "flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 text-xs",
-                  "sm:min-h-11 sm:flex-row sm:gap-2 sm:px-4 sm:text-sm",
+                  "group relative flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-[background,color,transform] duration-200",
                   active
-                    ? "font-semibold text-accent"
-                    : "font-medium text-muted hover:text-foreground",
+                    ? "bg-accent-soft text-accent"
+                    : "text-muted hover:translate-x-0.5 hover:bg-surface-2 hover:text-foreground",
                 )}
               >
-                <span aria-hidden="true">{item.icon}</span>
+                <span
+                  aria-hidden="true"
+                  className={cx(
+                    "absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-accent transition-all duration-200",
+                    active ? "scale-y-100 opacity-100" : "scale-y-0 opacity-0",
+                  )}
+                />
+                <Icon
+                  className="size-[1.15rem] transition-transform duration-200 group-hover:scale-105"
+                  strokeWidth={active ? 2.2 : 1.9}
+                  aria-hidden="true"
+                />
                 <span>{item.label}</span>
+                {active ? (
+                  <span className="ml-auto size-1.5 rounded-full bg-accent" aria-hidden="true" />
+                ) : null}
               </Link>
             </li>
           );

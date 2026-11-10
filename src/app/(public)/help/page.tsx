@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LifeBuoy, Plus } from "lucide-react";
 import { PageHeader } from "@/components/ui";
 
 export const metadata: Metadata = {
@@ -35,7 +36,7 @@ const QUESTIONS = [
       <>
         By default you get an email 7 days, 2 days, and 1 day before the deadline. You can change
         which offsets are used, the hour reminders go out, and the time zone they follow in{" "}
-        <Link href="/settings" className="underline underline-offset-2">
+        <Link href="/settings" className="font-medium text-accent underline-offset-4 hover:underline">
           Settings
         </Link>
         . Reminders are sent once per offset per item, so you will not get the same reminder twice.
@@ -81,8 +82,11 @@ const QUESTIONS = [
       <>
         Settings has an export button that produces a CSV or JSON copy of everything you entered. It
         also has account deletion: deleting removes your purchases, reminders, and uploaded files.
-        See the <Link href="/privacy" className="underline underline-offset-2">privacy page</Link> for
-        the full picture.
+        See the{" "}
+        <Link href="/privacy" className="font-medium text-accent underline-offset-4 hover:underline">
+          privacy page
+        </Link>{" "}
+        for the full picture.
       </>
     ),
   },
@@ -90,8 +94,11 @@ const QUESTIONS = [
     question: "I found a bug. Where do I report it?",
     answer: (
       <>
-        Use the <Link href="/contact" className="underline underline-offset-2">contact page</Link> and
-        include what you were doing, what you expected, and what happened. Please do not send
+        Use the{" "}
+        <Link href="/contact" className="font-medium text-accent underline-offset-4 hover:underline">
+          contact page
+        </Link>{" "}
+        and include what you were doing, what you expected, and what happened. Please do not send
         passwords or full card numbers.
       </>
     ),
@@ -102,20 +109,26 @@ export default function HelpPage() {
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <PageHeader
+        eyebrow="Support"
         title="Help"
         subtitle="Short answers about adding items, reminders, returns, refunds, and your data."
       />
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {QUESTIONS.map(({ question, answer }) => (
-          <details
-            key={question}
-            className="group rounded-xl border border-border bg-surface p-4 sm:p-5"
-          >
-            <summary className="cursor-pointer text-base font-medium marker:text-muted">
-              {question}
+          <details key={question} className="card group overflow-hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-[0.95rem] font-medium transition hover:bg-surface-2/50 sm:p-5 [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center gap-2.5">
+                <LifeBuoy className="size-4 shrink-0 text-accent" aria-hidden="true" />
+                {question}
+              </span>
+              <span className="grid size-7 shrink-0 place-items-center rounded-full border border-border bg-surface-2 text-muted transition-transform duration-200 group-open:rotate-45">
+                <Plus className="size-3.5" aria-hidden="true" />
+              </span>
             </summary>
-            <p className="mt-3 text-sm text-muted">{answer}</p>
+            <div className="px-4 pb-4 pl-[2.85rem] text-sm leading-relaxed text-muted sm:px-5 sm:pb-5 sm:pl-[3.1rem]">
+              {answer}
+            </div>
           </details>
         ))}
       </div>

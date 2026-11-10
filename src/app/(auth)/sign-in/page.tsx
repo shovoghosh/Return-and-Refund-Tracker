@@ -11,9 +11,9 @@ export default async function SignInPage() {
   if (user) redirect(user.emailVerifiedAt ? "/dashboard" : "/verify-email");
 
   return (
-    <Card>
-      <PageHeader title="Sign in" subtitle="Welcome back." />
-      <div className="mt-5">
+    <Card padding="lg" className="animate-fade-up">
+      <PageHeader eyebrow="Welcome back" title="Sign in" subtitle="Pick up where you left off." />
+      <div className="mt-6">
         <SignInForm />
       </div>
     </Card>

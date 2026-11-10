@@ -1,8 +1,8 @@
-import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth-guard";
 import { localDateISO } from "@/lib/status";
-import { PageHeader } from "@/components/ui";
+import { LinkButton, PageHeader } from "@/components/ui";
 import { PurchaseForm } from "../_components/purchase-form";
 
 export const metadata: Metadata = { title: "Add purchase — Return Tracker" };
@@ -19,12 +19,14 @@ export default async function NewPurchasePage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Add purchase"
+        eyebrow="New purchase"
+        title="Add a purchase"
         subtitle="Four fields are required. Everything else can wait until later."
         action={
-          <Link href="/dashboard" className="text-sm text-muted hover:text-foreground">
-            ← Back
-          </Link>
+          <LinkButton href="/dashboard" variant="ghost" size="sm">
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
+            Dashboard
+          </LinkButton>
         }
       />
       <PurchaseForm

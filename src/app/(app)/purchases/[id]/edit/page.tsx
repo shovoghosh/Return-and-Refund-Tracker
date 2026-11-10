@@ -1,9 +1,9 @@
-import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth-guard";
 import { getPurchase } from "@/lib/dal";
-import { PageHeader } from "@/components/ui";
+import { LinkButton, PageHeader } from "@/components/ui";
 import { PurchaseForm } from "../../_components/purchase-form";
 
 export const metadata: Metadata = { title: "Edit purchase — Return Tracker" };
@@ -22,12 +22,14 @@ export default async function EditPurchasePage({ params }: { params: Promise<{ i
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Edit purchase"
-        subtitle={item.name}
+        eyebrow="Edit purchase"
+        title={item.name}
+        subtitle="Corrections are welcome. The return deadline is whatever the store told you."
         action={
-          <Link href={`/purchases/${item.id}`} className="text-sm text-muted hover:text-foreground">
-            ← Back
-          </Link>
+          <LinkButton href={`/purchases/${item.id}`} variant="ghost" size="sm">
+            <ArrowLeft className="size-3.5" aria-hidden="true" />
+            Back to purchase
+          </LinkButton>
         }
       />
       <PurchaseForm

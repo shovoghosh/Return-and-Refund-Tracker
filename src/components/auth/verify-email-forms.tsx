@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Check, RefreshCw } from "lucide-react";
 import { FormFeedback, SubmitButton } from "@/components/auth/form-primitives";
 import { resendVerificationAction, verifyEmailAction } from "@/app/(auth)/actions";
 import type { ActionResult } from "@/lib/errors";
@@ -12,7 +13,10 @@ export function VerifyEmailForm({ token }: { token: string }) {
     <form action={action} className="flex flex-col gap-4" noValidate>
       <FormFeedback state={state} />
       <input type="hidden" name="token" value={token} />
-      <SubmitButton pendingLabel="Confirming…">Confirm my email</SubmitButton>
+      <SubmitButton pendingLabel="Confirming…" className="w-full">
+        <Check className="size-4" aria-hidden="true" />
+        Confirm my email
+      </SubmitButton>
     </form>
   );
 }
@@ -28,7 +32,8 @@ export function ResendVerificationForm() {
     <form action={action} className="flex flex-col gap-4" noValidate>
       <FormFeedback state={state} successMessage="Verification email sent. Check your inbox." />
       {!sent ? (
-        <SubmitButton variant="secondary" pendingLabel="Sending…">
+        <SubmitButton variant="secondary" pendingLabel="Sending…" className="w-full">
+          <RefreshCw className="size-4" aria-hidden="true" />
           Resend verification email
         </SubmitButton>
       ) : null}

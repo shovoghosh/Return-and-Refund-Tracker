@@ -1,7 +1,24 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Button, Card, Field, Input, Notice, Textarea } from "@/components/ui";
+import {
+  CalendarDays,
+  CreditCard,
+  Link2,
+  Save,
+  StickyNote,
+  Truck,
+  Wallet,
+} from "lucide-react";
+import {
+  Button,
+  Card,
+  Field,
+  IconTile,
+  Input,
+  Notice,
+  Textarea,
+} from "@/components/ui";
 import { saveReturnDetailsAction } from "@/lib/core-tracking/actions";
 import { formatCentsInput, suggestRefundCheckInISO } from "@/lib/core-tracking/logic";
 import type { ActionResult } from "@/lib/errors";
@@ -51,19 +68,25 @@ export function ReturnDetailsForm({
   const currencyLabel = currency && /^[A-Z]{3}$/.test(currency) ? currency : "the purchase currency";
 
   return (
-    <Card className="flex flex-col gap-4">
-      <div>
-        <h2 className="text-sm font-semibold">Return &amp; refund details</h2>
-        <p className="mt-1 text-xs text-muted">
-          All of this is optional. An expected refund date is a reminder you set for yourself — it is
-          not a promise from the store, and the app never claims money arrived until you confirm it.
-        </p>
+    <Card padding="lg">
+      <div className="flex items-start gap-3">
+        <IconTile tone="lilac" size="lg">
+          <Wallet />
+        </IconTile>
+        <div>
+          <h2 className="text-sm font-semibold">Return &amp; refund details</h2>
+          <p className="mt-1 max-w-xl text-[0.7rem] leading-relaxed text-muted">
+            All of this is optional. An expected refund date is a reminder you set for yourself — it
+            is not a promise from the store, and the app never claims money arrived until you confirm
+            it.
+          </p>
+        </div>
       </div>
 
-      {formError ? <Notice tone="error">{formError}</Notice> : null}
-      {saved ? <Notice tone="info">Return details saved.</Notice> : null}
+      {formError ? <Notice tone="error" className="mt-4">{formError}</Notice> : null}
+      {saved ? <Notice tone="success" className="mt-4">Return details saved.</Notice> : null}
 
-      <form action={action} className="flex flex-col gap-4">
+      <form action={action} className="mt-5 flex flex-col gap-5">
         <input type="hidden" name="itemId" value={itemId} />
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -78,6 +101,7 @@ export function ReturnDetailsForm({
               name="returnStartedAt"
               type="date"
               defaultValue={defaults.returnStartedAt ?? ""}
+              leadingIcon={<CalendarDays />}
               aria-invalid={errors.returnStartedAt ? true : undefined}
             />
           </Field>
@@ -94,6 +118,7 @@ export function ReturnDetailsForm({
               type="date"
               value={returnedAt}
               onChange={(e) => setReturnedAt(e.target.value)}
+              leadingIcon={<Truck />}
               aria-invalid={errors.returnedAt ? true : undefined}
             />
           </Field>
@@ -107,6 +132,7 @@ export function ReturnDetailsForm({
               placeholder="e.g. UPS, Canada Post"
               autoComplete="off"
               maxLength={100}
+              leadingIcon={<Truck />}
             />
           </Field>
 
@@ -118,61 +144,77 @@ export function ReturnDetailsForm({
               defaultValue={defaults.trackingNumber ?? ""}
               autoComplete="off"
               maxLength={120}
+              leadingIcon={<Link2 />}
             />
           </Field>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            label="Expected refund amount"
-            htmlFor="expectedRefundAmount"
-            error={errors.expectedRefundAmount}
-            hint={`Optional. In ${currencyLabel}.`}
-          >
-            <Input
-              id="expectedRefundAmount"
-              name="expectedRefundAmount"
-              inputMode="decimal"
-              defaultValue={formatCentsInput(defaults.expectedRefundCents)}
-              placeholder="e.g. 49.99"
-              autoComplete="off"
-              aria-invalid={errors.expectedRefundAmount ? true : undefined}
-            />
-          </Field>
-
-          <Field
-            label="Expected refund date"
-            htmlFor="expectedRefundDate"
-            error={errors.expectedRefundDate}
-            hint="A reminder to check your payment method — not a retailer promise."
-          >
-            <Input
-              id="expectedRefundDate"
-              name="expectedRefundDate"
-              type="date"
-              value={expectedRefundDate}
-              onChange={(e) => setExpectedRefundDate(e.target.value)}
-              aria-invalid={errors.expectedRefundDate ? true : undefined}
-            />
-          </Field>
-        </div>
-
-        {suggestedDate && !expectedRefundDate ? (
-          <p className="text-xs text-muted">
-            Suggested check-in: {suggestedDate} (14 days after the return date).{" "}
-            <button
-              type="button"
-              className="font-medium text-accent underline underline-offset-2"
-              onClick={() => setExpectedRefundDate(suggestedDate)}
+        <div className="rounded-xl border border-border/70 bg-surface-2/40 p-3.5">
+          <div className="mb-3 flex items-center gap-2">
+            <IconTile tone="moss" size="sm">
+              <Wallet />
+            </IconTile>
+            <p className="text-xs font-semibold">Refund expectations</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Expected refund amount"
+              htmlFor="expectedRefundAmount"
+              error={errors.expectedRefundAmount}
+              hint={`Optional. In ${currencyLabel}.`}
             >
-              Use this date
-            </button>
-          </p>
-        ) : null}
+              <Input
+                id="expectedRefundAmount"
+                name="expectedRefundAmount"
+                inputMode="decimal"
+                defaultValue={formatCentsInput(defaults.expectedRefundCents)}
+                placeholder="e.g. 49.99"
+                autoComplete="off"
+                aria-invalid={errors.expectedRefundAmount ? true : undefined}
+              />
+            </Field>
+
+            <Field
+              label="Expected refund date"
+              htmlFor="expectedRefundDate"
+              error={errors.expectedRefundDate}
+              hint="A reminder to check your payment method — not a retailer promise."
+            >
+              <Input
+                id="expectedRefundDate"
+                name="expectedRefundDate"
+                type="date"
+                value={expectedRefundDate}
+                onChange={(e) => setExpectedRefundDate(e.target.value)}
+                leadingIcon={<CalendarDays />}
+                aria-invalid={errors.expectedRefundDate ? true : undefined}
+              />
+            </Field>
+          </div>
+
+          {suggestedDate && !expectedRefundDate ? (
+            <p className="mt-3 text-[0.7rem] text-muted">
+              Suggested check-in: {suggestedDate} (14 days after the return date).{" "}
+              <button
+                type="button"
+                className="font-semibold text-accent underline underline-offset-2"
+                onClick={() => setExpectedRefundDate(suggestedDate)}
+              >
+                Use this date
+              </button>
+            </p>
+          ) : null}
+        </div>
 
         {showActual ? (
-          <div className="flex flex-col gap-4 rounded-lg border border-border p-3">
-            <p className="text-xs text-muted">
+          <div className="rounded-xl border border-moss/25 bg-moss-soft/40 p-3.5">
+            <div className="mb-3 flex items-center gap-2">
+              <IconTile tone="moss" size="sm">
+                <CreditCard />
+              </IconTile>
+              <p className="text-xs font-semibold">Refund received</p>
+            </div>
+            <p className="mb-3 text-[0.7rem] leading-relaxed text-muted">
               Only fill these in after you have checked your payment method and confirmed the money
               arrived yourself.
             </p>
@@ -200,6 +242,7 @@ export function ReturnDetailsForm({
                   name="actualRefundDate"
                   type="date"
                   defaultValue={defaults.actualRefundDate ?? ""}
+                  leadingIcon={<CalendarDays />}
                   aria-invalid={errors.actualRefundDate ? true : undefined}
                 />
               </Field>
@@ -218,10 +261,15 @@ export function ReturnDetailsForm({
           />
         </Field>
 
-        <div>
+        <div className="flex items-center gap-2.5">
           <Button type="submit" variant="secondary" disabled={pending}>
+            <Save className="size-4" aria-hidden="true" />
             {pending ? "Saving…" : "Save return details"}
           </Button>
+          <span className="hidden items-center gap-1.5 text-[0.65rem] text-muted sm:inline-flex">
+            <StickyNote className="size-3.5" aria-hidden="true" />
+            Only you can see these notes.
+          </span>
         </div>
       </form>
     </Card>

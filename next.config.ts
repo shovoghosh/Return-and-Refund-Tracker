@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
   // Workers variant into the bundle (see opennextjs.org/cloudflare/howtos/db).
   serverExternalPackages: ["@prisma/client", ".prisma/client"],
   poweredByHeader: false,
+  devIndicators: false,
 };
 
 export default nextConfig;
